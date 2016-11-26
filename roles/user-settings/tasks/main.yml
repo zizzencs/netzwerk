@@ -1,0 +1,50 @@
+- name: Create the default nanorc file
+  # command: creates="~{{ user }}/.nanorc" cp /usr/share/doc/nano-2.3.1/nanorc.sample ~{{ user }}/.nanorc
+  copy: remote_src=true force=no src=/usr/share/doc/nano-2.3.1/nanorc.sample dest=~{{ ansible_user_id }}/.nanorc mode=0640
+
+- name: Create the ~/.nano directory
+  file: path=~{{ ansible_user_id }}/.nano state=directory mode=0750
+
+- name: Copy the YAML and Jinja2 syntax highlighting files for nano
+  copy: force=no src="{{ file }}" dest="~{{ ansible_user_id }}/.nano/{{ file }}" mode=0640
+  with_items:
+    - yaml.nanorc
+    - jinja2.nanorc
+  loop_control:
+    loop_var: file
+
+- name: Configure nano to use YAML syntax highlighting
+  lineinfile:
+    dest: ~{{ ansible_user_id }}/.nanorc
+    state: present
+    line: "{{ line }}"
+  with_items:
+    - 'include "~/.nano/yaml.nanorc"'
+    - 'include "~/.nano/jinja2.nanorc"'
+  loop_control:
+    loop_var: line
+
+- name: Create the ~/.inputrc file
+  file: path=~{{ ansible_user_id }}/.inputrc state=touch mode=0640
+  register: touch_log
+  changed_when: touch_log.diff.before.state != "file"
+
+- name: Disable the PC speaker
+  blockinfile:
+    dest: ~{{ ansible_user_id }}/.inputrc
+    state: present
+    block: |
+      $include /etc/inputrc
+      set bell-style none
+
+- name: Install git
+  dnf: name=git state=present
+  become: yes
+
+- name: Set up git
+  git_config: name={{ option.name }} value={{ option.value }} scope=global
+  with_items:
+    - { name: 'user.name', value: 'Zizzencs' }
+    - { name: 'user.email', value: 'mezei.zoltan@gmail.com' }
+  loop_control:
+    loop_var: option

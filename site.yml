@@ -1,0 +1,10 @@
+- hosts: localhost
+  become: yes
+  roles:
+    - common-packages
+    - systemd-networkd
+
+- hosts: localhost
+  become: no
+  roles:
+    - user-settings

@@ -1,0 +1,53 @@
+# This play must be run as root (even with become: yes)
+
+- hosts: localhost
+  become: yes
+  tasks:
+
+  - name: Enable the EPEL repository
+    yum: name=epel-release state=present
+
+  - name: Install dnf
+    yum: name=dnf state=present
+
+  - name: Workaround for libsolv not handling bz2 - 1
+    # https://bugzilla.redhat.com/show_bug.cgi?id=1258416#c12
+    command: /usr/bin/rpm -qv libsolv
+    args:
+      warn: no
+    register: libsolv_version
+    changed_when: no
+
+  - name: Workaround for libsolv not handling bz2 - 2
+    yum: name=https://kojipkgs.fedoraproject.org//packages/libsolv/0.6.20/1.el7/x86_64/libsolv-0.6.20-1.el7.x86_64.rpm state=present
+    when: libsolv_version.stdout.find('0.6.11-1.el7.x86_64') != -1
+
+  - name: Clean up yum
+    command: /usr/bin/yum clean all
+    args:
+      warn: no
+    changed_when: no
+
+  - name: Install ansible (and some tools)
+    dnf: name={{ package }} state=present
+    with_items:
+      - ansible
+      - python-netaddr
+    loop_control:
+      loop_var: package
+
+  - name: Make sudo not ask for a password - 1
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      backrefs: yes
+      regexp: '^(%wheel\s+ALL=\(ALL\)\s+ALL)$'
+      line: '# \1'
+
+  - name: Make sudo not ask for a password - 2
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^#\s+(%wheel\s+ALL=\(ALL\)\s+NOPASSWD:\s+ALL)$'
+      line: '\1'
+      backrefs: yes

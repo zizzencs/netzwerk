@@ -1,0 +1,9 @@
+- name: Install commonly used packages
+  dnf: name={{ package }} state=present
+  with_items:
+    - nano
+    - mc
+    - bash-completion
+    - strace
+  loop_control:
+    loop_var: package

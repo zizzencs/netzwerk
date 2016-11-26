@@ -1,0 +1,21 @@
+{% set new_interface = info.stdout %}
+{% set old_interface = info.interface %}
+[Match]
+Name={{ new_interface }}
+
+[Network]
+{% set interface_facts = hostvars[inventory_hostname]['ansible_' ~ old_interface] %}
+{% if interface_facts['ipv4'] is defined %}
+{% set ipv4_address = interface_facts['ipv4'] %}
+{% set ip = ipv4_address['address'] %}
+{% set ip_netmask = ipv4_address['address'] ~ '/' ~ ipv4_address['netmask'] %}
+{% set ip_cidr = ip_netmask  | ipaddr('cidr') %}
+Address={{ ip_cidr }}
+{% set default_ip = ansible_default_ipv4['address'] %}
+{% if ip == default_ip %}
+Gateway={{ ansible_default_ipv4['gateway'] }}
+{% for dns_server in ansible_dns['nameservers'] %}
+DNS={{ dns_server }}
+{% endfor %}
+{% endif %}
+{% endif %}

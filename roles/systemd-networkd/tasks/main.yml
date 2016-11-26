@@ -1,0 +1,70 @@
+- name: Install systemd-networkd and systemd-resolved
+  dnf: name={{ package }} state=present
+  with_items:
+    - systemd-networkd
+    - systemd-resolved
+  loop_control:
+    loop_var: package
+
+- name: Create the systemd-networkd config directory
+  file: path=/etc/systemd/network state=directory
+
+- name: Disable the basic CDN policy, let systemd-networkd rename the devices
+  file:
+    src: /dev/null
+    dest: /etc/udev/rules.d/80-net-name-slot.rules
+    state: link
+
+- name: Configure systemd-networkd to use the "path" CDN policy
+  copy:
+    src: all.link
+    dest: /etc/systemd/network/all.link
+
+- name: Register old and new device names for each interface
+  shell: "udevadm info -e |grep -A9 ^P.*{{ interface }} |awk -F '=' '/ID_NET_NAME_PATH/ {print $2}'"
+  register: interface_info
+  when: "not '{{ interface }}' == 'lo'"
+  with_items: "{{ ansible_interfaces }}"
+  loop_control:
+    loop_var: interface
+  changed_when: false
+
+# - debug: var=interface_info.results
+
+- name: Set up the new interface files
+  # info.interface contains the old device name
+  # info.stdout contains the new device name
+  template:
+    src: dot.network.j2
+    dest: "/etc/systemd/network/{{ info.stdout }}.network"
+  when: "info.skipped is undefined"
+  with_items: "{{ interface_info.results }}"
+  loop_control:
+    loop_var: info
+    label: "{{ info.stdout | default('skipped') }}"
+
+- name: Disable network.service and NetworkManager.service
+  service: name="{{ service }}" enabled=no
+  with_items:
+    - network
+    - NetworkManager
+  loop_control:
+    loop_var: service
+
+- name: Enable systemd-networkd.service and systemd-resolved.service
+  service: name="{{ service }}" enabled=yes
+  with_items:
+    - systemd-networkd
+    - systemd-resolved
+  loop_control:
+    loop_var: service
+
+- name: Start systemd-resolved so we can create /etc/resolv.conf as a symlink
+  service: name=systemd-resolved state=started
+
+- name: Create /etc/resolv.conf as a symlink
+  file:
+    dest: /etc/resolv.conf
+    src: /run/systemd/resolve/resolv.conf
+    state: link
+    force: yes
