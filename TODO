@@ -1,0 +1,3 @@
+- split the general roles and the personal one to different playbooks
+- begin using ansible-vault for the sensitive variables (git username/e-mail, aiccu user/password)
+
