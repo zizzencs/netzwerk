@@ -21,7 +21,7 @@
     dest: /etc/systemd/network/all.link
 
 - name: Register old and new device names for each interface
-  shell: "udevadm info -e |grep -A9 ^P.*{{ interface }} |awk -F '=' '/ID_NET_NAME_PATH/ {print $2}'"
+  shell: "udevadm info -e |sed -ne '/^P.*{{ interface }}/,/^$/p' |awk -F '=' '/ID_NET_NAME_PATH/ {print $2}'"
   register: interface_info
   when: "not '{{ interface }}' == 'lo'"
   with_items: "{{ ansible_interfaces }}"
@@ -29,7 +29,7 @@
     loop_var: interface
   changed_when: false
 
-# - debug: var=interface_info.results
+- debug: var=interface_info.results
 
 - name: Set up the new interface files
   # info.interface contains the old device name
@@ -41,7 +41,7 @@
   with_items: "{{ interface_info.results }}"
   loop_control:
     loop_var: info
-    label: "{{ info.stdout | default('skipped') }}"
+#    label: "{{ info.stdout | default('skipped') }}"
 
 - name: Disable network.service and NetworkManager.service
   service: name="{{ service }}" enabled=no
