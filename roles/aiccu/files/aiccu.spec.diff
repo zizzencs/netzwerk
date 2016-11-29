@@ -1,0 +1,18 @@
+12c12
+< Release:   26%{?dist}
+---
+> Release:   27%{?dist}
+22,23c22,23
+< Patch3: aiccu-gnutls34.patch
+< Patch4: aiccu-setupscript.patch
+---
+> #Patch3: aiccu-gnutls34.patch
+> Patch3: aiccu-setupscript.patch
+44c44
+< %patch4 -p1
+---
+> #%patch4 -p1
+86a87,89
+> * Tue Nov 29 2016 Zoltan Mezei <mezei.zoltan@gmail.com> - 2007.01.15-27
+> - Modify it to run on Centos 7
+> 
