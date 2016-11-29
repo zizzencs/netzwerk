@@ -5,5 +5,7 @@
     - mc
     - bash-completion
     - strace
+    - wget
+    - traceroute
   loop_control:
     loop_var: package

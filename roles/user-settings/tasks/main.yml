@@ -1,5 +1,4 @@
 - name: Create the default nanorc file
-  # command: creates="~{{ user }}/.nanorc" cp /usr/share/doc/nano-2.3.1/nanorc.sample ~{{ user }}/.nanorc
   copy: remote_src=true force=no src=/usr/share/doc/nano-2.3.1/nanorc.sample dest=~{{ ansible_user_id }}/.nanorc mode=0640
 
 - name: Create the ~/.nano directory

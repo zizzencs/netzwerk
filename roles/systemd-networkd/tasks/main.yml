@@ -41,7 +41,7 @@
   with_items: "{{ interface_info.results }}"
   loop_control:
     loop_var: info
-#    label: "{{ info.stdout | default('skipped') }}"
+    label: "{{ info.stdout | default('skipped') }}"
 
 - name: Disable network.service and NetworkManager.service
   service: name="{{ service }}" enabled=no

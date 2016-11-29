@@ -3,6 +3,7 @@
   roles:
     - common-packages
     - systemd-networkd
+    - aiccu
 
 - hosts: localhost
   become: no
