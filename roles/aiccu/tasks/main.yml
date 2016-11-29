@@ -1,0 +1,7 @@
+- name: Copy the aiccu RPM
+  copy: force=no src=aiccu-2007.01.15-27.el7.centos.x86_64.rpm dest=/root/aiccu-2007.01.15-27.el7.centos.x86_64.rpm mode=0640
+
+- name: Install the aiccu RPM
+  dnf: name=/root/aiccu-2007.01.15-27.el7.centos.x86_64.rpm state=present
+
+  
