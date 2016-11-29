@@ -29,7 +29,7 @@
     loop_var: interface
   changed_when: false
 
-- debug: var=interface_info.results
+#- debug: var=interface_info.results
 
 - name: Set up the new interface files
   # info.interface contains the old device name
