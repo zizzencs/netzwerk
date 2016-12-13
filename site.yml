@@ -1,11 +1,13 @@
-- hosts: localhost
+# network setup
+
+- hosts: netzwerk
   become: yes
   roles:
     - common-packages
     - systemd-networkd
     - aiccu
 
-- hosts: localhost
-  become: no
-  roles:
-    - user-settings
+# - hosts: localhost
+#   become: no
+#   roles:
+#     - user-settings
