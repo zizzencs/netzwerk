@@ -1,5 +1,0 @@
-syntax "Jinja2" "\.j2$"
-
-color green		" (set|if|endif|for|endfor) "
-color red		"^\{%" "%\}$" "="
-color yellow		""(\\.|[^"])*"|'(\\.|[^'])*'"
